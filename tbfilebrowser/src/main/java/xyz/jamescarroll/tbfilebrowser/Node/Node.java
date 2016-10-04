@@ -88,4 +88,12 @@ public class Node<T> {
         void populate();
     }
 
+    public static abstract class AbstractNodeBinder<T> implements NodeBinder<T> {
+        protected T mData;
+
+        public AbstractNodeBinder(T mData) {
+            this.mData = mData;
+        }
+    }
+
 }

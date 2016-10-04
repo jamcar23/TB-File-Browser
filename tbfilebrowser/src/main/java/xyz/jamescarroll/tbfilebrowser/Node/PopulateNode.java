@@ -2,19 +2,15 @@ package xyz.jamescarroll.tbfilebrowser.Node;
 
 import android.util.Log;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import xyz.jamescarroll.tbfilebrowser.ExecuteCounter;
 
 /**
  * Created by jamescarroll on 10/4/16.
  */
-public class PopulateNode<T> extends Node<T> implements Node.PopulateChildrenNodes<T>, Runnable {
-    private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
-    private static final int CORE_POOL_SIZE = CPU_COUNT + 1;
-    private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
+public class PopulateNode<T> extends Node<T> implements Node.PopulateChildrenNodes<T>, Runnable, ExecuteCounter.OnExecutorFinished {
     private static final String TAG = "PopulateNode.TAG";
-    protected Node.NodeBinder<T> mBinder = null;
-    protected ExecutorService mExecutor = null;
+    private Node.NodeBinder<T> mBinder = null;
+    private ExecuteCounter mExecutor = null;
 
     public PopulateNode(T mData) {
         super(mData);
@@ -47,28 +43,40 @@ public class PopulateNode<T> extends Node<T> implements Node.PopulateChildrenNod
         }
 
         if (mExecutor == null) {
-            mExecutor = Executors.newFixedThreadPool(MAXIMUM_POOL_SIZE);
+            mExecutor = new ExecuteCounter(this);
         }
 
         mExecutor.execute(this);
+
     }
 
     // Runnable
 
     @Override
     public void run() {
-        T[] ch = mBinder.getChildrenToBeBinded();
+        if (mBinder != null) {
+            T[] ch = mBinder.getChildrenToBeBinded();
 
-        for (T t : ch) {
-            PopulateNode<T> n = populateSingleChild(t);
+            if (ch != null) {
+                for (T t : ch) {
+                    PopulateNode<T> n = populateSingleChild(t);
 
-            addChild(n);
-            n.setExecutor(this.mExecutor);
+                    addChild(n);
+                    n.setExecutor(this.mExecutor);
+                    n.setLeaf(mBinder.determineIfDataMakesLeafNode(t));
 
-            if (!mBinder.determineIfDataMakesLeafNode(t)) {
-                n.populate();
+                    if (!n.isLeaf()) {
+                        n.populate();
+                    }
+                }
+            } else {
+                Log.e(TAG, "run: children array from binder is null");
             }
+        } else {
+            Log.e(TAG, "run: mBinder is null");
         }
+
+        mExecutor.onRunnableFinished();
     }
 
     // Getters and Setters
@@ -81,11 +89,16 @@ public class PopulateNode<T> extends Node<T> implements Node.PopulateChildrenNod
         this.mBinder = mBinder;
     }
 
-    public ExecutorService getExecutor() {
+    public ExecuteCounter getExecutor() {
         return mExecutor;
     }
 
-    public void setExecutor(ExecutorService mExecutor) {
+    public void setExecutor(ExecuteCounter mExecutor) {
         this.mExecutor = mExecutor;
+    }
+
+    @Override
+    public void onExecutorFinished() {
+        Log.d(TAG, "onExecutorFinished: finished populating tree");
     }
 }
