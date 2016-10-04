@@ -2,7 +2,6 @@ package xyz.jamescarroll.tbfilebrowser;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import java.io.File;
 import java.util.concurrent.BlockingQueue;
@@ -11,49 +10,41 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicLong;
 
-import xyz.jamescarroll.layer.Util.AsyncUtil;
-
 /**
  * Created by jamescarroll on 7/2/16.
  */
 public class FastFileSearch {
+    private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
+    private static final int CORE_POOL_SIZE = CPU_COUNT + 1;
+    private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
     private static final String TAG = "FastFileSearch.TAG";
     private final AtomicLong mDirCount;
     private final AtomicLong mFileCount;
     private final OnFileFound mCallback;
     private final Handler mHandler;
-    private final boolean mSearchAllDirectories;
 
-    public FastFileSearch(OnFileFound callback, boolean searchAllSubdirectories) {
+    public FastFileSearch(OnFileFound callback) {
         mDirCount = new AtomicLong(0);
         mFileCount = new AtomicLong(0);
         mCallback = callback;
         mHandler = new Handler(Looper.getMainLooper());
-        mSearchAllDirectories = searchAllSubdirectories;
     }
 
     public void search(File baseDir, String[] name) {
-        final ExecutorService ex = Executors.newFixedThreadPool(AsyncUtil.MAXIMUM_POOL_SIZE);
+        final ExecutorService ex = Executors.newFixedThreadPool(MAXIMUM_POOL_SIZE);
         final BlockingQueue<File> dQueue = new LinkedBlockingDeque<>();
         final BlockingQueue<File> fQueue = new LinkedBlockingDeque<>();
         int i;
 
-        if (mSearchAllDirectories) {
-            for (i = 0; i < AsyncUtil.CORE_POOL_SIZE; ++i) {
-                ex.submit(new RunnableDirSearch(dQueue, fQueue, mDirCount, mFileCount));
-                ex.submit(new RunnableFileSearch(fQueue, mFileCount, name));
-            }
-            // for loops, together, submit CPU_CORES * 3 + 2 runnables to executor
-            for (; i > 1; --i) {
-                ex.submit(new RunnableFileSearch(fQueue, mFileCount, name));
-            }
-        } else {
+        // for loops, together, submit CPU_CORES * 3 + 2 runnables to executor
+        for (i = 0; i < CORE_POOL_SIZE; ++i) {
             ex.submit(new RunnableDirSearch(dQueue, fQueue, mDirCount, mFileCount));
-
-            for (i = 0; i < AsyncUtil.MAXIMUM_POOL_SIZE; ++i) {
-                ex.submit(new RunnableFileSearch(fQueue, mFileCount, name));
-            }
+            ex.submit(new RunnableFileSearch(fQueue, mFileCount, name));
         }
+        for (; i > 1; --i) {
+            ex.submit(new RunnableFileSearch(fQueue, mFileCount, name));
+        }
+
         mDirCount.incrementAndGet();
         dQueue.add(baseDir);
     }
@@ -62,14 +53,12 @@ public class FastFileSearch {
         void onFileFound(File file);
     }
 
-    public static FastFileSearch search(File baseDir, OnFileFound callback, boolean
-            searchAllDirectories, String... name) {
-        return search(baseDir, name, callback, searchAllDirectories);
+    public static FastFileSearch search(File baseDir, OnFileFound callback, String... name) {
+        return search(baseDir, name, callback);
     }
 
-    public static FastFileSearch search(File baseDir, String[] name, OnFileFound callback,
-                                        boolean searchAllDirectories) {
-        FastFileSearch ffs = new FastFileSearch(callback, searchAllDirectories);
+    public static FastFileSearch search(File baseDir, String[] name, OnFileFound callback) {
+        FastFileSearch ffs = new FastFileSearch(callback);
         ffs.search(baseDir, name);
 
         return ffs;
@@ -101,7 +90,7 @@ public class FastFileSearch {
 
                     if (lf != null) {
                         for (final File f: lf) {
-                            if (mSearchAllDirectories && f.isDirectory()) {
+                            if (f.isDirectory()) {
                                 dCount.incrementAndGet();
                                 dQueue.add(f);
                             } else {
@@ -147,7 +136,6 @@ public class FastFileSearch {
                             mHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Log.i(TAG, "run: file found: " + fFile.getAbsolutePath());
                                     mCallback.onFileFound(fFile);
                                 }
                             });
