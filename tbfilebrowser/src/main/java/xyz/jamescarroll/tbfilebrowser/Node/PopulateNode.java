@@ -46,7 +46,9 @@ public class PopulateNode<T> extends Node<T> implements Node.PopulateChildrenNod
             mExecutor = new ExecuteCounter(this);
         }
 
-        mExecutor.execute(this);
+        if (!mLeaf) {
+            mExecutor.execute(this);
+        }
 
     }
 
@@ -54,7 +56,7 @@ public class PopulateNode<T> extends Node<T> implements Node.PopulateChildrenNod
 
     @Override
     public void run() {
-        if (mBinder != null) {
+        if (mBinder != null && !mLeaf) {
             T[] ch = mBinder.getChildrenToBeBinded();
 
             if (ch != null) {

@@ -32,6 +32,7 @@ public class FileNode extends PopulateNode<File> {
 
     private void init() {
         setBinder(new FileBinder(mData));
+        mLeaf = !mData.isDirectory();
     }
 
     // Node.PopulateChildren
@@ -60,7 +61,7 @@ public class FileNode extends PopulateNode<File> {
 
         @Override
         public boolean determineIfDataMakesLeafNode(File data) {
-            return !mData.isDirectory();
+            return !data.isDirectory();
         }
     }
 }
