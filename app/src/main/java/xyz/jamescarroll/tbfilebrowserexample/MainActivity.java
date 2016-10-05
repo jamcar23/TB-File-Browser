@@ -6,7 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import java.io.File;
 
 import xyz.jamescarroll.tbfilebrowser.FileBrowser;
-import xyz.jamescarroll.tbfilebrowser.Fragments.FileBrowseFragment;
+import xyz.jamescarroll.tbfilebrowser.UI.FileBrowseFragment;
+import xyz.jamescarroll.tbfilebrowser.UI.FilesViewAdapter;
 
 /**
  * The MIT License (MIT)
@@ -32,7 +33,7 @@ import xyz.jamescarroll.tbfilebrowser.Fragments.FileBrowseFragment;
  * SOFTWARE.
  */
 
-public class MainActivity extends AppCompatActivity implements FileBrowseFragment.OnItemSelected {
+public class MainActivity extends AppCompatActivity implements FilesViewAdapter.OnItemSelected {
 
 
     @Override
