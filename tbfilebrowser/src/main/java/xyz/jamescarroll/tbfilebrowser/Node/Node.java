@@ -31,6 +31,7 @@ public class Node<T> {
     protected Node<T> mParent;
     protected List<Node<T>> mChildren = new ArrayList<>();
     protected boolean mLeaf = false;
+    protected String mName = "";
 
     public Node(T mData) {
         this.mData = mData;
@@ -66,6 +67,10 @@ public class Node<T> {
         return mParent;
     }
 
+    public boolean hasParent() {
+        return mParent != null;
+    }
+
     public void setParent(Node<T> mParent) {
         this.mParent = mParent;
     }
@@ -82,6 +87,10 @@ public class Node<T> {
         this.mChildren.addAll(children);
     }
 
+    public Node<T> getChild(int position) {
+        return this.mChildren.get(position);
+    }
+
     public void addChild(T data) {
         this.mChildren.add(new Node<>(data));
     }
@@ -96,6 +105,14 @@ public class Node<T> {
 
     public void setLeaf(boolean mLeaf) {
         this.mLeaf = mLeaf;
+    }
+
+    public String getName() {
+        return mName;
+    }
+
+    public void setName(String mName) {
+        this.mName = mName;
     }
 
     // Interfaces

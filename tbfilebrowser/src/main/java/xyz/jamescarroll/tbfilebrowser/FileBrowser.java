@@ -32,9 +32,11 @@ import xyz.jamescarroll.tbfilebrowser.Node.PopulateNode;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+
 public class FileBrowser {
     private static final String TAG = "FileBrowser.TAG";
-    private static final String TREE_KEY = "FileBrowser.FILE_TREE_KEY";
+    public static final String TREE_KEY = "FileBrowser.FILE_TREE_KEY";
 
     /**
      * A convenience method for {@link #buildTree(File)} that passes in external

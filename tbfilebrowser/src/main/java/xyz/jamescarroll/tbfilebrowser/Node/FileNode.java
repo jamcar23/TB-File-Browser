@@ -53,6 +53,7 @@ public class FileNode extends PopulateNode<File> {
     private void init() {
         setBinder(new FileBinder(mData));
         mLeaf = !mData.isDirectory();
+        mName = mData.getName();
     }
 
     // Node.PopulateChildren

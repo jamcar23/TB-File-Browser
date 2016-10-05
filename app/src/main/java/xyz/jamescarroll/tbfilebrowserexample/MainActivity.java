@@ -3,7 +3,10 @@ package xyz.jamescarroll.tbfilebrowserexample;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import java.io.File;
+
 import xyz.jamescarroll.tbfilebrowser.FileBrowser;
+import xyz.jamescarroll.tbfilebrowser.Fragments.FileBrowseFragment;
 
 /**
  * The MIT License (MIT)
@@ -29,7 +32,8 @@ import xyz.jamescarroll.tbfilebrowser.FileBrowser;
  * SOFTWARE.
  */
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements FileBrowseFragment.OnItemSelected {
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,5 +41,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         FileBrowser.buildTree();
+
+        getSupportFragmentManager().beginTransaction().replace(R.id.fl_frame,
+                FileBrowseFragment.findFragment(this), FileBrowseFragment.TAG).commitAllowingStateLoss();
+
+
+    }
+
+    @Override
+    public void onFileSelected(File file) {
+
     }
 }

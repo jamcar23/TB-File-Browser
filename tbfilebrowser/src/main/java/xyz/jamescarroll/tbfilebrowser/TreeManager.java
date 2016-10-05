@@ -1,5 +1,7 @@
 package xyz.jamescarroll.tbfilebrowser;
 
+import android.util.Log;
+
 import java.util.HashMap;
 
 import xyz.jamescarroll.tbfilebrowser.Node.Node;
@@ -31,6 +33,7 @@ import xyz.jamescarroll.tbfilebrowser.Node.PopulateNode;
 public class TreeManager {
     private static final String TAG = "TreeManager.TAG";
     private static HashMap<String, Node> sTrees = new HashMap<>();
+    private static HashMap<String, Node> sCurrentNodes = new HashMap<>();
 
     /**
      * Gets the root node of the tree specified by the key.
@@ -53,6 +56,29 @@ public class TreeManager {
      */
     public static void setRoot(String key, Node root) {
         sTrees.put(key, root);
+    }
+
+    /**
+     * Gets current node from a tree, if a current node hasn't been set
+     * it uses the root node. If neither has been set then it returns null.
+     *
+     * @param key the key for the tree
+     * @return the current node, if set
+     */
+    public static Node getCurrentNode(String key) {
+        if (sCurrentNodes.containsKey(key)) {
+            return sCurrentNodes.get(key);
+        } else if (sTrees.containsKey(key)) {
+            return sTrees.get(key);
+        }
+
+        Log.e(TAG, "getCurrentNode: no current or root node for key: " + key);
+        return null;
+    }
+
+    public static void setCurrentNode(String key, Node node) {
+        sCurrentNodes.remove(key);
+        sCurrentNodes.put(key, node);
     }
 
     /**
