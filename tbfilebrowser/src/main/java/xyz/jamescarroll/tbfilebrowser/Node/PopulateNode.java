@@ -98,7 +98,17 @@ public class PopulateNode<T> extends Node<T> implements Node.PopulateChildrenNod
             Log.e(TAG, "run: mBinder is null");
         }
 
-        mExecutor.onRunnableFinished();
+        if (mExecutor != null) {
+            mExecutor.onRunnableFinished();
+        }
+    }
+
+    @Override
+    protected void cleanThis() {
+        super.cleanThis();
+        mExecutor.clean();
+        mExecutor = null;
+        mBinder = null;
     }
 
     // Getters and Setters

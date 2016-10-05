@@ -3,6 +3,8 @@ package xyz.jamescarroll.tbfilebrowser.Node;
 import java.util.ArrayList;
 import java.util.List;
 
+import xyz.jamescarroll.tbfilebrowser.ExecuteCounter;
+
 /**
  * The MIT License (MIT)
  *
@@ -113,6 +115,32 @@ public class Node<T> {
 
     public void setName(String mName) {
         this.mName = mName;
+    }
+
+    public void cleanChildren(final ExecuteCounter executeCounter) {
+        for (final Node<T> node : mChildren) {
+            executeCounter.execute(new Runnable() {
+                @Override
+                public void run() {
+                    node.cleanChildren(executeCounter);
+                }
+            });
+
+        }
+
+        cleanThis();
+    }
+
+    protected void cleanData() {
+        mData = null;
+    }
+
+    protected void cleanThis() {
+        cleanData();
+        mParent = null;
+        mChildren.clear();
+        mLeaf = false;
+        mName = "";
     }
 
     // Interfaces

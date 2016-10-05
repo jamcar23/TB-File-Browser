@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public class ExecuteCounter<T> {
+public class ExecuteCounter {
     public static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
     public static final int CORE_POOL_SIZE = CPU_COUNT + 1;
     public static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
@@ -68,8 +68,19 @@ public class ExecuteCounter<T> {
         long f = mFinished.incrementAndGet();
 
         if (mCallback != null && mStarted.get() == f) {
+            reset();
             mCallback.onExecutorFinished();
         }
+    }
+
+    protected void reset() {
+        mStarted.set(0);
+        mFinished.set(0);
+    }
+
+    public void clean() {
+        reset();
+        mExecutor.shutdown();
     }
 
     public interface OnExecutorFinished {

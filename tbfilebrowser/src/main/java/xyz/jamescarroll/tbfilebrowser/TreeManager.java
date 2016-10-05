@@ -2,6 +2,7 @@ package xyz.jamescarroll.tbfilebrowser;
 
 import android.util.Log;
 
+import java.util.Collection;
 import java.util.HashMap;
 
 import xyz.jamescarroll.tbfilebrowser.Node.Node;
@@ -116,5 +117,21 @@ public class TreeManager {
     public static void forceBuildTree(String key, PopulateNode node) {
         setRoot(key, node);
         node.populate();
+    }
+
+    public static void cleanSingleTree(String key) {
+        final ExecuteCounter ec = new ExecuteCounter(null);
+        sTrees.remove(key).cleanChildren(ec);
+    }
+
+    public static void cleanAllTrees() {
+        final ExecuteCounter ec = new ExecuteCounter(null);
+        final Collection<Node> trees = sTrees.values();
+
+        for (Node node : trees) {
+            node.cleanChildren(ec);
+        }
+
+        sTrees.clear();
     }
 }
